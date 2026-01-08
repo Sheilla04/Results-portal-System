@@ -1,65 +1,31 @@
 import { useState } from 'react';
-import { 
-  Upload, 
-  ClockHistory, 
-  CheckCircle, 
-  FileEarmarkSpreadsheet,
-  Eye,
-  Pencil,
-  Trash,
-  SortDown,
-  Download,
-  PlusCircle,
-  Search,
-  ThreeDotsVertical,
-  Lightning,
-  Clock,
-  InfoCircle,
-  PersonBadge
-} from 'react-bootstrap-icons';
-import StatCard from '../components/StatCard';
+import { SubmissionTrendChart, CoursePerformanceChart, StatusPieChart } from '../components/Charts';
 import '../components/LecturerDashboard.css';
-import { Card, Button, Badge } from 'react-bootstrap';
-
 
 function LecturerDashboard() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   
-  const stats = [
-    {
-      title: "Results Uploaded",
-      value: "3 Courses",
-      description: "This semester",
-      icon: Upload,
-      iconBgColor: "rgba(13, 110, 253, 0.1)",
-      iconColor: "text-primary"
-    },
-    {
-      title: "Pending Approval",
-      value: "2 Submissions",
-      description: "Awaiting review",
-      icon: ClockHistory,
-      iconBgColor: "rgba(255, 193, 7, 0.1)",
-      iconColor: "text-warning"
-    },
-    {
-      title: "Approved Results",
-      value: "1 Course",
-      description: "Verified & published",
-      icon: CheckCircle,
-      iconBgColor: "rgba(25, 135, 84, 0.1)",
-      iconColor: "text-success"
-    },
-    {
-      title: "Total Students",
-      value: "87 Students",
-      description: "Across all courses",
-      icon: FileEarmarkSpreadsheet,
-      iconBgColor: "rgba(108, 117, 125, 0.1)",
-      iconColor: "text-secondary"
-    }
+  const submissionTrendData = [
+    { month: 'Sep', submitted: 2, approved: 1 },
+    { month: 'Oct', submitted: 3, approved: 2 },
+    { month: 'Nov', submitted: 4, approved: 3 },
+    { month: 'Dec', submitted: 3, approved: 3 },
+    { month: 'Jan', submitted: 5, approved: 4 },
+    { month: 'Feb', submitted: 3, approved: 2 }
+  ];
+
+  const coursePerformanceData = [
+    { course: 'CSC 401', average: 85 },
+    { course: 'CSC 403', average: 78 },
+    { course: 'CSC 405', average: 82 }
+  ];
+
+  const statusDistributionData = [
+    { name: 'Approved', value: 1 },
+    { name: 'Pending', value: 2 },
+    { name: 'Draft', value: 3 }
   ];
 
   const courses = [
@@ -74,7 +40,8 @@ function LecturerDashboard() {
       students: 30,
       fileSize: "2.4 MB",
       uploadedBy: "Dr. Smith",
-      fileFormat: "Excel (.xlsx)"
+      fileFormat: "Excel (.xlsx)",
+      averageScore: 85
     },
     {
       id: 2,
@@ -87,7 +54,8 @@ function LecturerDashboard() {
       students: 28,
       fileSize: "1.8 MB",
       uploadedBy: "Dr. Johnson",
-      fileFormat: "Excel (.xlsx)"
+      fileFormat: "Excel (.xlsx)",
+      averageScore: 78
     },
     {
       id: 3,
@@ -100,19 +68,25 @@ function LecturerDashboard() {
       students: 29,
       fileSize: "2.1 MB",
       uploadedBy: "Dr. Williams",
-      fileFormat: "Excel (.xlsx)"
+      fileFormat: "Excel (.xlsx)",
+      averageScore: 82
     }
   ];
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      approved: { label: "Approved", class: "badge-success" },
-      pending: { label: "Pending Review", class: "badge-warning" },
-      draft: { label: "Draft", class: "badge-secondary" },
-      rejected: { label: "Rejected", class: "badge-danger" }
+      approved: { label: "Approved", color: "#198754", icon: "https://img.icons8.com/ios-filled/14/ffffff/checked.png" },
+      pending: { label: "Pending Review", color: "#ffc107", icon: "https://img.icons8.com/ios-filled/14/ffffff/clock.png" },
+      draft: { label: "Draft", color: "#6c757d", icon: "https://img.icons8.com/ios-filled/14/ffffff/document.png" },
+      rejected: { label: "Rejected", color: "#dc3545", icon: "https://img.icons8.com/ios-filled/14/ffffff/cancel.png" }
     };
     const config = statusConfig[status] || statusConfig.draft;
-    return <span className={`badge ${config.class}`}>{config.label}</span>;
+    return (
+      <span className="status-badge" style={{ backgroundColor: config.color }}>
+        <img src={config.icon} alt={config.label} />
+        {config.label}
+      </span>
+    );
   };
 
   const filteredCourses = courses.filter(course => {
@@ -123,168 +97,262 @@ function LecturerDashboard() {
     course.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalStudents = courses.reduce((sum, course) => sum + course.students, 0);
+  const approvedCount = courses.filter(c => c.status === 'approved').length;
+  const pendingCount = courses.filter(c => c.status === 'pending').length;
+
   return (
-    <div className="container-fluid py-4">
-    {/* Header with Lecturer Icon */}
-    <div className="dashboard-header mb-4">
-      <div className="d-flex align-items-center">
-        <div className="lecturer-icon-wrapper me-3">
-          <PersonBadge size={28} color="#198754" />
-        </div>
-        <div>
-          <h1 className="fw-bold mb-1" style={{ color: '#198754', fontSize: '2rem' }}>
-            Lecturer Dashboard
-          </h1>
-          <p className="text-muted mb-0">
-            Upload, manage, and track student examination results
-          </p>
-        </div>
-      </div>
-      <div className="header-actions">
-        <button className="btn btn-primary d-flex align-items-center" style={{ backgroundColor: '#198754', borderColor: '#198754' }}>
-          <PlusCircle className="me-2" size={18} />
-          Upload Results
-        </button>
-        <button className="btn btn-outline-secondary d-flex align-items-center">
-          <Download className="me-2" size={18} />
-          Templates
-        </button>
-      </div>
-    </div>
-
-      {/* Stats Cards - Horizontal Grid */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-        {stats.map((stat, index) => (
-          <div style={{ flex: '1 1 calc(25% - 0.75rem)', minWidth: '250px' }} key={index}>
-            <StatCard {...stat} />
-          </div>
-        ))}
-      </div>
-
-      {/* Results Management Section */}
-      <div className="card border-0 shadow-sm mb-4">
-        <div className="card-header bg-white border-0 py-3">
-          <div className="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-              <h5 className="mb-0 fw-semibold">Course Results Management</h5>
-              <small className="text-muted">Spring Semester 2024/2025</small>
+    <div className="dashboard-wrapper lecturer-dashboard">
+      <div className="dashboard-container">
+        {/* Header */}
+        <div className="dashboard-header">
+          <div className="header-content">
+            <div className="header-left">
+              <div className="header-icon">
+                <img src="https://img.icons8.com/fluency/48/000000/teacher.png" alt="Lecturer" />
+              </div>
+              <div className="header-text">
+                <h1 className="dashboard-title">Lecturer Dashboard</h1>
+                <p className="dashboard-subtitle">Upload, manage, and track student examination results</p>
+              </div>
             </div>
-            <div className="d-flex gap-2 mt-2 mt-sm-0">
-              <div className="search-box">
-                <Search className="search-icon" size={18} />
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search courses..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+            <div className="header-actions">
+              <button className="btn btn-primary">
+                <img src="https://img.icons8.com/ios-filled/20/ffffff/upload.png" alt="Upload" className="btn-icon" />
+                Upload Results
+              </button>
+              <button className="btn btn-secondary">
+                <img src="https://img.icons8.com/ios-filled/20/0066cc/download.png" alt="Download" className="btn-icon" />
+                Download Template
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="stats-grid">
+          <div className="stat-card stat-primary">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Results Uploaded</div>
+                <div className="stat-value">{courses.length}</div>
+                <div className="stat-description">This semester</div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/0066cc/upload.png" alt="Upload" />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card stat-warning">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Pending Approval</div>
+                <div className="stat-value">{pendingCount}</div>
+                <div className="stat-trend warning">
+                  <img src="https://img.icons8.com/ios-filled/16/ffc107/clock.png" alt="Clock" />
+                  Awaiting review
+                </div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/ffc107/clock.png" alt="Pending" />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card stat-success">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Approved Results</div>
+                <div className="stat-value">{approvedCount}</div>
+                <div className="stat-trend positive">
+                  <img src="https://img.icons8.com/ios-filled/16/198754/checked.png" alt="Check" />
+                  Verified & published
+                </div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/198754/checked.png" alt="Approved" />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card stat-info">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Total Students</div>
+                <div className="stat-value">{totalStudents}</div>
+                <div className="stat-description">Across all courses</div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/0dcaf0/group.png" alt="Students" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tabs - Using Button Groups */}
-        <div className="border-bottom">
-          <div className="btn-group w-100" role="group">
+        {/* Charts Section */}
+        <div className="charts-section">
+          <div className="chart-container chart-large">
+            <div className="chart-header">
+              <div className="chart-title-group">
+                <img src="https://img.icons8.com/fluency/24/0066cc/line-chart.png" alt="Chart" className="chart-icon" />
+                <div>
+                  <h3 className="chart-title">Submission Trends</h3>
+                  <p className="chart-subtitle">Monthly submission and approval rates</p>
+                </div>
+              </div>
+              <button className="btn-icon-only">
+                <img src="https://img.icons8.com/ios-filled/18/6c757d/download.png" alt="Export" />
+              </button>
+            </div>
+            <div className="chart-body">
+              <SubmissionTrendChart data={submissionTrendData} />
+            </div>
+          </div>
+
+          <div className="chart-container chart-small">
+            <div className="chart-header">
+              <div className="chart-title-group">
+                <img src="https://img.icons8.com/fluency/24/0066cc/pie-chart.png" alt="Chart" className="chart-icon" />
+                <div>
+                  <h3 className="chart-title">Status Distribution</h3>
+                  <p className="chart-subtitle">Current submissions</p>
+                </div>
+              </div>
+            </div>
+            <div className="chart-body">
+              <StatusPieChart data={statusDistributionData} />
+            </div>
+          </div>
+        </div>
+
+        {/* Course Performance Chart */}
+        <div className="chart-container chart-full">
+          <div className="chart-header">
+            <div className="chart-title-group">
+              <img src="https://img.icons8.com/fluency/24/0066cc/bar-chart.png" alt="Chart" className="chart-icon" />
+              <div>
+                <h3 className="chart-title">Course Performance Overview</h3>
+                <p className="chart-subtitle">Average scores across your courses</p>
+              </div>
+            </div>
+            <button className="btn-icon-only">
+              <img src="https://img.icons8.com/ios-filled/18/6c757d/download.png" alt="Export" />
+            </button>
+          </div>
+          <div className="chart-body">
+            <CoursePerformanceChart data={coursePerformanceData} />
+          </div>
+        </div>
+
+        {/* Results Table */}
+        <div className="table-container">
+          <div className="table-header">
+            <div className="table-title-group">
+              <img src="https://img.icons8.com/fluency/24/0066cc/list.png" alt="List" className="table-icon" />
+              <div>
+                <h3 className="table-title">Course Results Management</h3>
+                <p className="table-subtitle">Spring Semester 2024/2025</p>
+              </div>
+            </div>
+            <div className="search-wrapper">
+              <img src="https://img.icons8.com/ios-filled/18/6c757d/search.png" alt="Search" className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="table-tabs">
             <button 
-              type="button"
-              className={`btn btn-outline-primary ${activeTab === 'all' ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
               onClick={() => setActiveTab('all')}
             >
               All Courses ({courses.length})
             </button>
             <button 
-              type="button"
-              className={`btn btn-outline-primary ${activeTab === 'pending' ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
               onClick={() => setActiveTab('pending')}
             >
-              Pending Review ({courses.filter(c => c.status === 'pending').length})
+              Pending ({pendingCount})
             </button>
             <button 
-              type="button"
-              className={`btn btn-outline-primary ${activeTab === 'approved' ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
               onClick={() => setActiveTab('approved')}
             >
-              Approved ({courses.filter(c => c.status === 'approved').length})
+              Approved ({approvedCount})
             </button>
             <button 
-              type="button"
-              className={`btn btn-outline-primary ${activeTab === 'draft' ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === 'draft' ? 'active' : ''}`}
               onClick={() => setActiveTab('draft')}
             >
               Drafts ({courses.filter(c => c.status === 'draft').length})
             </button>
           </div>
-        </div>
 
-        <div className="card-body p-0">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0">
-              <thead className="table-light">
+          <div className="table-wrapper">
+            <table className="results-table">
+              <thead>
                 <tr>
-                  <th style={{ width: '15%' }}>
-                    <div className="d-flex align-items-center">
-                      Course Code
-                      <SortDown className="ms-1" size={14} />
-                    </div>
-                  </th>
-                  <th style={{ width: '25%' }}>Course Name</th>
-                  <th style={{ width: '10%' }}>Students</th>
-                  <th style={{ width: '15%' }}>Submitted</th>
-                  <th style={{ width: '15%' }}>Status</th>
-                  <th style={{ width: '20%' }} className="text-end">Actions</th>
+                  <th>Course Code</th>
+                  <th>Course Name</th>
+                  <th>Students</th>
+                  <th>Avg Score</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                  <th className="text-end">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCourses.map((course) => (
-                  <tr key={course.id} className={selectedCourse === course.id ? 'table-active' : ''}>
+                  <tr key={course.id} className={selectedCourse === course.id ? 'selected' : ''}>
                     <td>
-                      <div className="fw-semibold">{course.code}</div>
-                      <small className="text-muted">{course.semester}</small>
+                      <span className="course-code">{course.code}</span>
+                      <br />
+                      <span className="course-semester">{course.semester}</span>
                     </td>
                     <td>
-                      <div className="fw-medium">{course.name}</div>
-                      <small className="text-muted">{course.fileFormat}</small>
+                      <div className="course-name">{course.name}</div>
+                      <span className="file-format">{course.fileFormat}</span>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center">
-                        <span className="badge bg-light text-dark">
-                          {course.students} students
-                        </span>
-                      </div>
+                      <span className="badge badge-light">
+                        <img src="https://img.icons8.com/ios-filled/14/6c757d/group.png" alt="Students" />
+                        {course.students} students
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`score ${course.averageScore >= 80 ? 'score-high' : course.averageScore >= 70 ? 'score-medium' : 'score-low'}`}>
+                        {course.averageScore}%
+                      </span>
                     </td>
                     <td>
                       <div>{course.submissionDate}</div>
-                      <small className="text-muted">{course.fileSize}</small>
+                      <span className="file-size">{course.fileSize}</span>
                     </td>
                     <td>{getStatusBadge(course.status)}</td>
                     <td className="text-end">
                       <div className="action-buttons">
-                        <button 
-                          className="btn btn-sm btn-outline-primary me-1"
-                          title="View Details"
-                        >
-                          <Eye size={16} />
+                        <button className="action-btn" title="View Details">
+                          <img src="https://img.icons8.com/ios-filled/18/0066cc/visible.png" alt="View" />
                         </button>
                         <button 
-                          className="btn btn-sm btn-outline-warning me-1"
+                          className="action-btn" 
                           title="Edit"
                           disabled={course.status === 'approved'}
                         >
-                          <Pencil size={16} />
+                          <img 
+                            src={course.status === 'approved' ? "https://img.icons8.com/ios-filled/18/6c757d/edit.png" : "https://img.icons8.com/ios-filled/18/ffc107/edit.png"} 
+                            alt="Edit" 
+                          />
                         </button>
-                        <button 
-                          className="btn btn-sm btn-outline-danger me-1"
-                          title="Delete"
-                        >
-                          <Trash size={16} />
-                        </button>
-                        <button 
-                          className="btn btn-sm btn-outline-secondary"
-                          title="More Options"
-                        >
-                          <ThreeDotsVertical size={16} />
+                        <button className="action-btn" title="Delete">
+                          <img src="https://img.icons8.com/ios-filled/18/dc3545/delete.png" alt="Delete" />
                         </button>
                       </div>
                     </td>
@@ -293,151 +361,14 @@ function LecturerDashboard() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* Table Footer */}
-        <div className="card-footer bg-white border-0 py-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">
-              Showing {filteredCourses.length} of {courses.length} courses
-            </small>
-            <div className="d-flex gap-2">
-              <button className="btn btn-outline-secondary btn-sm">
-                <Download className="me-1" size={14} />
-                Export Report
-              </button>
-              <button className="btn btn-primary btn-sm">
-                Bulk Actions
-              </button>
+          <div className="table-footer">
+            <div className="table-footer-left">
+              <span className="table-info">Showing {filteredCourses.length} of {courses.length} courses</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions & Guidelines - Side by Side as Cards */}
-      <div className="mb-4" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        {/* Quick Actions Card - 65% width */}
-        <div style={{ flex: '1 1 65%', minWidth: '300px' }}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white border-0 py-3">
-              <h6 className="mb-0 fw-semibold d-flex align-items-center">
-                <Lightning size={18} className="text-warning me-2" />
-                Quick Actions
-              </h6>
-            </Card.Header>
-            <Card.Body className="p-3">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <Button variant="outline-primary" className="w-100 text-start p-3" style={{ minHeight: '80px' }}>
-                  <div className="d-flex align-items-start">
-                    <Upload size={24} className="text-primary me-3" />
-                    <div>
-                      <div className="fw-medium mb-1">Upload New Results</div>
-                      <small className="text-muted">Excel template required</small>
-                    </div>
-                  </div>
-                </Button>
-                
-                <Button variant="outline-success" className="w-100 text-start p-3" style={{ minHeight: '80px' }}>
-                  <div className="d-flex align-items-start">
-                    <Download size={24} className="text-success me-3" />
-                    <div>
-                      <div className="fw-medium mb-1">Download Template</div>
-                      <small className="text-muted">Standard format</small>
-                    </div>
-                  </div>
-                </Button>
-                
-                <Button variant="outline-warning" className="w-100 text-start p-3" style={{ minHeight: '80px' }}>
-                  <div className="d-flex align-items-start">
-                    <Clock size={24} className="text-warning me-3" />
-                    <div>
-                      <div className="fw-medium mb-1">Check Deadlines</div>
-                      <small className="text-muted">Submission timeline</small>
-                    </div>
-                  </div>
-                </Button>
-                
-                <Button variant="outline-info" className="w-100 text-start p-3" style={{ minHeight: '80px' }}>
-                  <div className="d-flex align-items-start">
-                    <Eye size={24} className="text-info me-3" />
-                    <div>
-                      <div className="fw-medium mb-1">View Guidelines</div>
-                      <small className="text-muted">Upload procedures</small>
-                    </div>
-                  </div>
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
-
-        {/* Submission Guidelines Card - 33% width */}
-        <div style={{ flex: '1 1 32%', minWidth: '280px' }}>
-          <Card className="border-0 shadow-sm h-100">
-            <Card.Header className="bg-white border-0 py-3">
-              <h6 className="mb-0 fw-semibold d-flex align-items-center">
-                <InfoCircle size={18} className="text-info me-2" />
-                Submission Guidelines
-              </h6>
-            </Card.Header>
-            <Card.Body className="p-3">
-              <div className="guidelines-list">
-                <div className="guideline-item d-flex align-items-start mb-3">
-                  <CheckCircle size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-                  <small>Use the official Excel template</small>
-                </div>
-                <div className="guideline-item d-flex align-items-start mb-3">
-                  <CheckCircle size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-                  <small>Verify student IDs and names</small>
-                </div>
-                <div className="guideline-item d-flex align-items-start mb-3">
-                  <CheckCircle size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-                  <small>Grades must follow university scale</small>
-                </div>
-                <div className="guideline-item d-flex align-items-start mb-3">
-                  <CheckCircle size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-                  <small>Submit before the deadline</small>
-                </div>
-                <div className="guideline-item d-flex align-items-start mb-3">
-                  <CheckCircle size={16} className="text-success me-2 mt-1 flex-shrink-0" />
-                  <small>Include all required columns</small>
-                </div>
-              </div>
-              
-              <div className="deadline-alert mt-4 pt-3 border-top">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <small className="text-muted fw-medium">Deadline:</small>
-                  <Badge bg="danger" className="px-3 py-2">January 31, 2026</Badge>
-                </div>
-                <small className="text-muted d-block">Late submissions require special approval</small>
-              </div>
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
-
-      {/* Support Section */}
-      <div className="card border-0 shadow-sm mt-4">
-        <div className="card-body py-3">
-          <div className="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-              <h6 className="mb-0">Need assistance with results upload?</h6>
-              <small className="text-muted">Contact the Examination Office</small>
-            </div>
-            <div className="d-flex gap-2 mt-2 mt-sm-0">
-              <button className="btn btn-outline-secondary btn-sm">
-                <i className="bi bi-question-circle me-1"></i>
-                Help Center
-              </button>
-              <button className="btn btn-outline-primary btn-sm">
-                <i className="bi bi-telephone me-1"></i>
-                Support Hotline
-              </button>
-              <button className="btn btn-outline-success btn-sm">
-                <i className="bi bi-envelope me-1"></i>
-                Email Support
-              </button>
-            </div>
+            <button className="btn btn-outline">
+              <img src="https://img.icons8.com/ios-filled/16/6c757d/download.png" alt="Download" className="btn-icon" />
+              Export Report
+            </button>
           </div>
         </div>
       </div>
