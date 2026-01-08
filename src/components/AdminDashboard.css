@@ -1,0 +1,198 @@
+.admin-dashboard {
+  padding: 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.admin-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(23, 43, 77, 0.1);
+  border-radius: 12px;
+  border: 2px solid rgba(23, 43, 77, 0.2);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Search Box */
+.search-box {
+  position: relative;
+  min-width: 250px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  z-index: 10;
+}
+
+.search-box .form-control {
+  padding-left: 40px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+/* Table Styling */
+.table th {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: none;
+  background-color: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(23, 43, 77, 0.04);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.action-buttons .btn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Badges */
+.badge {
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.badge-danger {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.badge-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #997404;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.badge-success {
+  background-color: rgba(25, 135, 84, 0.1);
+  color: #198754;
+  border: 1px solid rgba(25, 135, 84, 0.2);
+}
+
+.badge-info {
+  background-color: rgba(13, 202, 240, 0.1);
+  color: #0dcaf0;
+  border: 1px solid rgba(13, 202, 240, 0.2);
+}
+
+.badge-dark {
+  background-color: rgba(23, 43, 77, 0.1);
+  color: #172b4d;
+  border: 1px solid rgba(23, 43, 77, 0.2);
+}
+
+/* Verification Requests */
+.verification-item {
+  transition: background-color 0.2s ease;
+}
+
+.verification-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* System Status */
+.system-status .status-item {
+  padding: 0.5rem;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+/* Admin Theme Colors */
+.text-dark {
+  color: #172b4d !important;
+}
+
+.btn-dark {
+  background-color: #172b4d !important;
+  border-color: #172b4d !important;
+}
+
+.btn-dark:hover {
+  background-color: #0f1f38 !important;
+  border-color: #0d1a30 !important;
+}
+
+.btn-outline-dark {
+  color: #172b4d;
+  border-color: #172b4d;
+}
+
+.btn-outline-dark:hover {
+  background-color: #172b4d;
+  border-color: #172b4d;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+  }
+  
+  .header-actions {
+    width: 100%;
+  }
+  
+  .search-box {
+    min-width: 100%;
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+}
+
+/* Card Styling */
+.card {
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  overflow: hidden;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+}

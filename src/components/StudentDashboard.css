@@ -1,0 +1,274 @@
+/* StudentDashboard.css */
+
+/* Welcome Card Styling */
+.welcome-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.welcome-card .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.welcome-card strong {
+  color: white;
+}
+
+.welcome-card .avatar-circle {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-card .avatar-circle i {
+  color: white;
+  font-size: 2rem;
+}
+
+/* Card Improvements */
+.card {
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+/* Grade Badges */
+.grade-badge {
+  min-width: 45px;
+  padding: 0.35rem 0.5rem;
+  font-weight: 600;
+}
+
+/* Table Styling */
+.table-hover tbody tr:hover {
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  border-top: none;
+}
+
+/* Quick Action Buttons */
+.btn-quick-action {
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-quick-action:hover {
+  border-left-color: #667eea;
+  background-color: #f8f9fa;
+}
+
+/* GPA Trend */
+.gpa-trend .progress {
+  background-color: #e9ecef;
+}
+
+/* Theme Colors */
+.theme-primary {
+  color: #667eea;
+}
+
+.theme-bg-primary {
+  background-color: #667eea;
+}
+
+.bg-primary-subtle {
+  background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.bg-success-subtle {
+  background-color: rgba(40, 167, 69, 0.1) !important;
+}
+
+.bg-info-subtle {
+  background-color: rgba(23, 162, 184, 0.1) !important;
+}
+
+.bg-warning-subtle {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .welcome-card .row > div {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Table cell padding */
+.table td,
+.table th {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+}
+
+/* Additional spacing for table rows */
+.table tbody tr {
+  height: 70px;
+}
+
+/* Better spacing for badges in table */
+.table .badge {
+  padding: 0.4rem 0.75rem;
+}
+
+/* Quick Action Button Spacing */
+.quick-action-btn {
+  min-height: 80px;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.quick-action-btn:active {
+  transform: translateY(0);
+}
+
+/* Bottom Action Button Animations */
+.bottom-action-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.bottom-action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.bottom-action-btn:active {
+  transform: translateY(-1px);
+}
+
+/* Ripple effect on click */
+.bottom-action-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.bottom-action-btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Icon container animation */
+.bottom-action-btn:hover .icon-container {
+  transform: rotate(10deg) scale(1.1);
+}
+
+.icon-container {
+  transition: transform 0.3s ease;
+}
+
+/* Chevron animation */
+.bottom-action-btn:hover .chevron-icon {
+  transform: translateX(5px);
+}
+
+.chevron-icon {
+  transition: transform 0.3s ease;
+}
+
+/* Student Welcome Card */
+.student-welcome-card {
+  background: linear-gradient(135deg, #0066cc 0%, #3399ff 100%);
+  color: white;
+  border-radius: 16px;
+}
+
+.student-avatar-circle {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.student-stat-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-status-indicator {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+
+/* Compact Header Styles */
+.small-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #f8f9fa;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Smaller spacing */
+.compact-spacing {
+  margin-bottom: 1rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  h4, h5 {
+    font-size: 1.1rem;
+  }
+}
