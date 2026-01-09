@@ -1,533 +1,273 @@
 import '../components/StudentDashboard.css';
-import { Row, Col, Button, Badge } from 'react-bootstrap';
-import { BarChart, Clipboard,FileEarmark,Journal, JournalCheck, Eye, Download, CheckCircle,
-   FileEarmarkSpreadsheet , Lightning, ShieldCheck, Printer, ChevronRight, QuestionCircle, Envelope, 
-  Flag,  
-  Mortarboard, 
-  PersonBadge, 
-  Building, 
-  CalendarEvent} from "react-bootstrap-icons";
-import StatCard from '../components/StatCard';
-
+import { GPATrendChart, GradeDistributionChart } from '../components/Charts';
 
 function StudentDashboard() {
-
-  const containerStyle = {
-
-    backdropFilter: 'blur(10px)',
-    borderRadius: '15px',
-    padding: '20px',
-    margin: '0 auto',
-    transition: 'all 0.3s ease',
-    position: 'relative',
-    overflow: 'hidden',
-    maxWidth: '100%'
-  };
-  // Mock data - in real app, this would come from props or API
   const studentInfo = {
     name: "John Doe",
     id: "2020/CS/001",
     academicYear: "2024/2025",
     semester: "Spring",
     program: "Computer Science",
-    department: "Department of Computing"
+    department: "Department of Computing",
+    cgpa: 3.75,
+    currentGPA: 3.82
   };
 
   const courses = [
-    { code: "CSC 401", name: "Artificial Intelligence", grade: "A", status: "Approved", lecturer: "Dr. Smith" },
-    { code: "CSC 403", name: "Machine Learning", grade: "B+", status: "Approved", lecturer: "Prof. Johnson" },
-    { code: "CSC 405", name: "Computer Security", grade: "A-", status: "Approved", lecturer: "Dr. Williams" },
-    { code: "MTH 301", name: "Advanced Calculus", grade: "B", status: "Approved", lecturer: "Prof. Brown" },
-    { code: "ENG 201", name: "Technical Writing", grade: "A", status: "Approved", lecturer: "Dr. Davis" }
+    { code: "CSC 401", name: "Artificial Intelligence", grade: "A", credits: 3, status: "Approved", lecturer: "Dr. Smith", score: 92 },
+    { code: "CSC 403", name: "Machine Learning", grade: "B+", credits: 3, status: "Approved", lecturer: "Prof. Johnson", score: 87 },
+    { code: "CSC 405", name: "Computer Security", grade: "A-", credits: 3, status: "Approved", lecturer: "Dr. Williams", score: 90 },
+    { code: "MTH 301", name: "Advanced Calculus", grade: "B", credits: 4, status: "Approved", lecturer: "Prof. Brown", score: 83 },
+    { code: "ENG 201", name: "Technical Writing", grade: "A", credits: 2, status: "Approved", lecturer: "Dr. Davis", score: 94 }
+  ];
+
+  const gpaTrendData = [
+    { semester: 'Fall 2022', gpa: 3.45 },
+    { semester: 'Spring 2023', gpa: 3.52 },
+    { semester: 'Fall 2023', gpa: 3.68 },
+    { semester: 'Spring 2024', gpa: 3.75 },
+    { semester: 'Fall 2024', gpa: 3.78 },
+    { semester: 'Spring 2025', gpa: 3.82 }
+  ];
+
+  const gradeDistributionData = [
+    { grade: 'A', count: 2 },
+    { grade: 'A-', count: 1 },
+    { grade: 'B+', count: 1 },
+    { grade: 'B', count: 1 },
+    { grade: 'C', count: 0 }
   ];
 
   const getGradeColor = (grade) => {
-    const gradeMap = {
-      'A': 'success',
-      'A-': 'success',
-      'B+': 'primary',
-      'B': 'info',
-      'B-': 'info',
-      'C+': 'warning',
-      'C': 'warning',
-      'D': 'danger',
-      'F': 'danger'
-    };
-    return gradeMap[grade] || 'secondary';
+    if (grade === 'A' || grade === 'A-') return '#198754';
+    if (grade === 'B+' || grade === 'B') return '#0dcaf0';
+    if (grade === 'B-' || grade === 'C+' || grade === 'C') return '#ffc107';
+    return '#dc3545';
   };
 
+  const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0);
+  const totalPoints = courses.reduce((sum, course) => {
+    const pointMap = { 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'D': 1.0, 'F': 0.0 };
+    return sum + (pointMap[course.grade] || 0) * course.credits;
+  }, 0);
+  const semesterGPA = (totalPoints / totalCredits).toFixed(2);
+
   return (
-    <div className="container-fluid py-4">
-    {/* Compact Header with Student Icon */}
-      <div className="mb-4">
-      {/* Heading with Student Icon */}
-      <div className="d-flex align-items-center mb-3">
-        <div className="student-icon-wrapper me-3">
-          <Mortarboard size={32} color="#0066cc" />
-        </div>
-        <div>
-          <h1 className="fw-bold mb-1" style={{ color: '#0066cc', fontSize: '2rem' }}>
-            Student Dashboard
-          </h1>
-          <p className="text-muted mb-0 small">John Doe • 2020/CS/001 • Spring Semester 2025</p>
-        </div>
-      </div>
-      
-      {/* Mini Info Cards */}
-      <div className="row g-2 mb-3">
-        <div className="col-6 col-md-3">
-          <div className="card border p-2">
-            <div className="d-flex align-items-center">
-              <Mortarboard className="text-primary me-2" size={16} />
-              <div>
-                <small className="text-muted d-block">Program</small>
-                <small className="fw-medium">Computer Science</small>
+    <div className="dashboard-wrapper student-dashboard">
+      <div className="dashboard-container">
+        {/* Header */}
+        <div className="dashboard-header">
+          <div className="header-content">
+            <div className="header-left">
+              <div className="header-icon">
+                <img src="https://img.icons8.com/fluency/48/000000/student-male.png" alt="Student" />
               </div>
+              <div className="header-text">
+                <h1 className="dashboard-title">Student Dashboard</h1>
+                <p className="dashboard-subtitle">{studentInfo.name} • {studentInfo.id} • {studentInfo.program}</p>
+              </div>
+            </div>
+            <div className="header-actions">
+              <button className="btn btn-secondary">
+                <img src="https://img.icons8.com/ios-filled/20/0066cc/download.png" alt="Download" className="btn-icon" />
+                Download Transcript
+              </button>
+              <button className="btn btn-primary">
+                <img src="https://img.icons8.com/ios-filled/20/ffffff/print.png" alt="Print" className="btn-icon" />
+                Print Results
+              </button>
             </div>
           </div>
         </div>
-        <div className="col-6 col-md-3">
-          <div className="card border p-2">
-            <div className="d-flex align-items-center">
-              <CalendarEvent className="text-primary me-2" size={16} />
-              <div>
-                <small className="text-muted d-block">Semester</small>
-                <small className="fw-medium">Spring 2025</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card border p-2">
-            <div className="d-flex align-items-center">
-              <CheckCircle className="text-success me-2" size={16} />
-              <div>
-                <small className="text-muted d-block">Status</small>
-                <small className="fw-medium">Active</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-6 col-md-3">
-          <div className="card border p-2">
-            <div className="d-flex align-items-center">
-              <JournalCheck className="text-success me-2" size={16} />
-              <div>
-                <small className="text-muted d-block">Results</small>
-                <small className="fw-medium">All Published</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Action Buttons */}
-      <div className="d-flex justify-content-end gap-2 mb-3">
-        <button className="btn btn-outline-primary btn-sm d-flex align-items-center">
-          <Download className="me-2" size={14} />
-          Transcript
-        </button>
-        <button className="btn btn-primary btn-sm d-flex align-items-center" style={{ backgroundColor: '#0066cc', borderColor: '#0066cc' }}>
-          <Printer className="me-2" size={14} />
-          Print
-        </button>
-      </div>
-    </div>
 
-
-      {/* Quick Stats Cards */}
-      <div style = {containerStyle}>
-      <div className="mb-4" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', width: '100%' }}>
-        <div style={{ flex: '1 1 calc(25% - 0.75rem)', minWidth: '200px', maxWidth: '25%' }}>
-          <StatCard
-            title="Results Status"
-            value={`${courses.length}/6`}
-            badge="All Published"
-            badgeVariant="success"
-            description={`${courses.length} courses`}
-            icon={Journal}
-            iconBgColor="#e8f5f0"
-            iconColor="text-primary"
-          />
-        </div>
-
-        <div style={{ flex: '1 1 calc(25% - 0.75rem)', minWidth: '200px', maxWidth: '25%' }}>
-          <StatCard
-            title="Courses Taken"
-            value={courses.length}
-            description="This Semester"
-            icon={Clipboard}
-            iconBgColor="#d1f4e0"
-            iconColor="text-success"
-          />
-        </div>
-
-        <div style={{ flex: '1 1 calc(25% - 0.75rem)', minWidth: '200px', maxWidth: '25%' }}>
-          <StatCard
-            title="Average Grade"
-            value="B+"
-            description={`Based on ${courses.length} courses`}
-            icon={BarChart}
-            iconBgColor="#d1ecf1"
-            iconColor="text-info"
-          />
-        </div>
-
-        <div style={{ flex: '1 1 calc(25% - 0.75rem)', minWidth: '200px', maxWidth: '25%' }}>
-          <StatCard
-            title="Transcript"
-            value={<Badge bg="primary" className="fw-normal mb-1">Available</Badge>}
-            description="Last updated: Today"
-            icon={FileEarmark}
-            iconBgColor="#fff3cd"
-            iconColor="text-warning"
-          />
-        </div>
-      </div>
-      </div>
-
-      {/* Main Content Area */}
-      <Row>
-       {/* Results Table */}
-        <Col lg={8}>
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-header bg-white border-0 py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h5 className="mb-0 fw-semibold">
-                    <i className="bi bi-clipboard-data me-2 text-primary"></i>
-                    Current Semester Results
-                  </h5>
-                  <small className="text-muted">{studentInfo.semester} Semester {studentInfo.academicYear}</small>
+        {/* Stats Grid */}
+        <div className="stats-grid">
+          <div className="stat-card stat-primary">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Current GPA</div>
+                <div className="stat-value">{studentInfo.currentGPA}</div>
+                <div className="stat-trend positive">
+                  <img src="https://img.icons8.com/ios-filled/16/198754/up-arrow.png" alt="Up" />
+                  +0.07 from last semester
                 </div>
-                
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/0066cc/statistics.png" alt="GPA" />
               </div>
             </div>
-            <div className="card-body p-0">
-              <div className="table-responsive">
-                <table className="table table-hover mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Course Code</th>
-                      <th>Course Name</th>
-                      <th>Type</th>
-                      <th>Lecturer</th>
-                      <th className="text-center">Grade</th>
-                      <th className="text-center">Status</th>
-                      <th className="text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {courses.map((course, index) => (
-                      <tr key={index}>
-                        <td>
-                          <div className="fw-semibold">{course.code}</div>
-                        </td>
-                        <td>
-                          <div>{course.name}</div>
-                        </td>
-                        <td>
-                          <Badge bg="secondary" className="fw-normal">Core</Badge>
-                        </td>
-                        <td>
-                          <div>{course.lecturer}</div>
-                        </td>
-                        <td className="text-center">
-                          <Badge bg={getGradeColor(course.grade)} className="grade-badge">
-                            {course.grade}
-                          </Badge>
-                        </td>
-                        <td className="text-center">
-                          <Badge bg="success" className="fw-normal">
-                            <CheckCircle size={14} className="me-1" />
-                            {course.status}
-                          </Badge>
-                        </td>
-                        <td className="text-center">
-                          <Button variant="link" size="sm" className="p-0 me-2" title="View Details">
-                            <Eye size={18} className="text-primary" />
-                          </Button>
-                          <Button variant="link" size="sm" className="p-0" title="Download">
-                            <Download size={18} className="text-secondary" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+          </div>
 
-            <div className="d-flex gap-2">
-              <Button variant="primary" size="sm">
-                <Download size={16} className="me-1" />
-                Export PDF
-              </Button>
-              <Button variant="outline-primary" size="sm">
-                <FileEarmarkSpreadsheet size={16} className="me-1" />
+          <div className="stat-card stat-success">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Cumulative GPA</div>
+                <div className="stat-value">{studentInfo.cgpa}</div>
+                <div className="stat-description">Overall performance</div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/198754/trophy.png" alt="CGPA" />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card stat-info">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Courses This Semester</div>
+                <div className="stat-value">{courses.length}</div>
+                <div className="stat-description">{totalCredits} credit hours</div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/0dcaf0/book.png" alt="Courses" />
+              </div>
+            </div>
+          </div>
+
+          <div className="stat-card stat-warning">
+            <div className="stat-content">
+              <div className="stat-info">
+                <div className="stat-label">Results Status</div>
+                <div className="stat-value">{courses.length}/{courses.length}</div>
+                <div className="stat-badge success">
+                  <img src="https://img.icons8.com/ios-filled/14/198754/checked.png" alt="Check" />
+                  All Published
+                </div>
+              </div>
+              <div className="stat-icon-wrapper">
+                <img src="https://img.icons8.com/fluency/40/ffc107/checked.png" alt="Status" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="charts-section">
+          <div className="chart-container chart-large">
+            <div className="chart-header">
+              <div className="chart-title-group">
+                <img src="https://img.icons8.com/fluency/24/0066cc/line-chart.png" alt="Chart" className="chart-icon" />
+                <div>
+                  <h3 className="chart-title">GPA Trend Over Time</h3>
+                  <p className="chart-subtitle">Semester-by-semester performance</p>
+                </div>
+              </div>
+              <button className="btn-icon-only">
+                <img src="https://img.icons8.com/ios-filled/18/6c757d/download.png" alt="Export" />
+              </button>
+            </div>
+            <div className="chart-body">
+              <GPATrendChart data={gpaTrendData} />
+            </div>
+          </div>
+
+          <div className="chart-container chart-small">
+            <div className="chart-header">
+              <div className="chart-title-group">
+                <img src="https://img.icons8.com/fluency/24/0066cc/bar-chart.png" alt="Chart" className="chart-icon" />
+                <div>
+                  <h3 className="chart-title">Grade Distribution</h3>
+                  <p className="chart-subtitle">Current semester grades</p>
+                </div>
+              </div>
+            </div>
+            <div className="chart-body">
+              <GradeDistributionChart data={gradeDistributionData} />
+            </div>
+          </div>
+        </div>
+
+        {/* Results Table */}
+        <div className="table-container">
+          <div className="table-header">
+            <div className="table-title-group">
+              <img src="https://img.icons8.com/fluency/24/0066cc/list.png" alt="List" className="table-icon" />
+              <div>
+                <h3 className="table-title">Current Semester Results</h3>
+                <p className="table-subtitle">{studentInfo.semester} Semester {studentInfo.academicYear}</p>
+              </div>
+            </div>
+            <div className="table-actions">
+              <button className="btn btn-outline">
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 48 48">
+<path fill="#4CAF50" d="M41,10H25v28h16c0.553,0,1-0.447,1-1V11C42,10.447,41.553,10,41,10z"></path><path fill="#FFF" d="M32 15H39V18H32zM32 25H39V28H32zM32 30H39V33H32zM32 20H39V23H32zM25 15H30V18H25zM25 25H30V28H25zM25 30H30V33H25zM25 20H30V23H25z"></path><path fill="#2E7D32" d="M27 42L6 38 6 10 27 6z"></path><path fill="#FFF" d="M19.129,31l-2.411-4.561c-0.092-0.171-0.186-0.483-0.284-0.938h-0.037c-0.046,0.215-0.154,0.541-0.324,0.979L13.652,31H9.895l4.462-7.001L10.274,17h3.837l2.001,4.196c0.156,0.331,0.296,0.725,0.42,1.179h0.04c0.078-0.271,0.224-0.68,0.439-1.22L19.237,17h3.515l-4.199,6.939l4.316,7.059h-3.74V31z"></path>
+</svg>
                 Export Excel
-              </Button>
-            </div>
-            
-            <div className="card-footer bg-white border-0 py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  Showing {courses.length} courses • All results are final
-                </small>
-                <Button variant="outline-secondary" size="sm">
-                  View Previous Semesters
-                </Button>
-              </div>
+              </button>
+              <button className="btn btn-outline">
+                <img src="https://img.icons8.com/ios-filled/16/6c757d/pdf.png" alt="PDF" className="btn-icon" />
+                Export PDF
+              </button>
             </div>
           </div>
-        </Col>
-
-        {/* Sidebar - Quick Actions */}
-        <Col lg={4} className="mt-4 mt-lg-0">
-          <div className="card border-0 shadow-sm mb-3">
-            <div className="card-header bg-white border-0 py-3">
-              <h6 className="mb-0 fw-semibold text-center">
-                <Lightning size={18} className="me-2 text-warning" />
-                Quick Actions
-              </h6>
-            </div>
-            <div className="card-body" style={{ padding: '2rem' }}>
-              <div className="d-flex flex-column" style={{ gap: '1.5rem' }}>
-                <Button 
-                  variant="primary" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between quick-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div style={{
-                      width: '45px',
-                      height: '45px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '1rem'
-                    }}>
-                      <Download size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold">Download Official Transcript</div>
-                      <small className="d-block opacity-75 fw-normal mt-1">
-                        PDF format with official seal
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-white" />
-                </Button>
-
-                <Button 
-                  variant="outline-success" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between quick-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div style={{
-                      width: '45px',
-                      height: '45px',
-                      borderRadius: '10px',
-                      backgroundColor: '#d1f4e0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '1rem'
-                    }}>
-                      <ShieldCheck size={20} className="text-success" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-success">Request Verification</div>
-                      <small className="d-block text-muted fw-normal mt-1">
-                        For employers or institutions
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-success" />
-                </Button>
-
-                <Button 
-                  variant="outline-secondary" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between quick-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div style={{
-                      width: '45px',
-                      height: '45px',
-                      borderRadius: '10px',
-                      backgroundColor: '#f8f9fa',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '1rem'
-                    }}>
-                      <Printer size={20} className="text-secondary" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Print Results Slip</div>
-                      <small className="d-block text-muted fw-normal mt-1">
-                        Semester results summary
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-secondary" />
-                </Button>
-              </div>
-            </div>
+          <div className="table-wrapper">
+            <table className="results-table">
+              <thead>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Course Name</th>
+                  <th>Credits</th>
+                  <th>Lecturer</th>
+                  <th className="text-center">Score</th>
+                  <th className="text-center">Grade</th>
+                  <th className="text-center">Status</th>
+                  <th className="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.map((course, index) => (
+                  <tr key={index}>
+                    <td>
+                      <span className="course-code">{course.code}</span>
+                    </td>
+                    <td>{course.name}</td>
+                    <td>
+                      <span className="badge badge-secondary">{course.credits} CH</span>
+                    </td>
+                    <td>
+                      <span className="lecturer-name">{course.lecturer}</span>
+                    </td>
+                    <td className="text-center">
+                      <span className={`score ${course.score >= 90 ? 'score-high' : course.score >= 80 ? 'score-medium' : 'score-low'}`}>
+                        {course.score}%
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span className="grade-badge" style={{ backgroundColor: getGradeColor(course.grade) }}>
+                        {course.grade}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span className="status-badge status-approved">
+                        <img src="https://img.icons8.com/ios-filled/12/ffffff/checked.png" alt="Check" />
+                        {course.status}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <div className="action-buttons">
+                        <button className="action-btn" title="View Details">
+                          <img src="https://img.icons8.com/ios-filled/18/0066cc/visible.png" alt="View" />
+                        </button>
+                        <button className="action-btn" title="Download">
+                          <img src="https://img.icons8.com/ios-filled/18/6c757d/download.png" alt="Download" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </Col>
-      </Row>
-
-      {/* Bottom Actions */}
-      <Row className="mt-4">
-        <Col>
-          <div className="card border-0 shadow-sm">
-            <div className="card-body" style={{ padding: '2rem' }}>
-              <div className="mb-4 text-center">
-                <h6 className="mb-1">Need assistance?</h6>
-                <small className="text-muted">Contact the Examination Office for result inquiries</small>
-              </div>
-              <div className="d-flex flex-column flex-md-row" style={{ gap: '1.5rem' }}>
-                <Button 
-                  variant="outline-secondary" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between bottom-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px',
-                    flex: '1'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div 
-                      className="icon-container"
-                      style={{
-                        width: '45px',
-                        height: '45px',
-                        borderRadius: '10px',
-                        backgroundColor: '#f8f9fa',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '1rem'
-                      }}
-                    >
-                      <QuestionCircle size={20} className="text-secondary" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Help Center</div>
-                      <small className="d-block text-muted fw-normal mt-1">
-                        Get support and guidance
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-secondary chevron-icon" />
-                </Button>
-
-                <Button 
-                  variant="outline-secondary" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between bottom-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px',
-                    flex: '1'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div 
-                      className="icon-container"
-                      style={{
-                        width: '45px',
-                        height: '45px',
-                        borderRadius: '10px',
-                        backgroundColor: '#f8f9fa',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '1rem'
-                      }}
-                    >
-                      <Envelope size={20} className="text-secondary" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Contact Exam Office</div>
-                      <small className="d-block text-muted fw-normal mt-1">
-                        Send inquiry or message
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-secondary chevron-icon" />
-                </Button>
-
-                <Button 
-                  variant="outline-secondary" 
-                  className="py-3 px-4 d-flex align-items-center justify-content-between bottom-action-btn"
-                  style={{
-                    borderRadius: '12px',
-                    borderWidth: '2px',
-                    transition: 'all 0.3s ease',
-                    width: '100%',
-                    minHeight: '85px',
-                    flex: '1'
-                  }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div 
-                      className="icon-container"
-                      style={{
-                        width: '45px',
-                        height: '45px',
-                        borderRadius: '10px',
-                        backgroundColor: '#f8f9fa',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '1rem'
-                      }}
-                    >
-                      <Flag size={20} className="text-secondary" />
-                    </div>
-                    <div>
-                      <div className="fw-semibold text-dark">Appeal Results</div>
-                      <small className="d-block text-muted fw-normal mt-1">
-                        Submit result appeal
-                      </small>
-                    </div>
-                  </div>
-                  <ChevronRight size={20} className="text-secondary chevron-icon" />
-                </Button>
-              </div>
+          <div className="table-footer">
+            <div className="table-footer-left">
+              <span className="table-info">Showing {courses.length} courses • Semester GPA: <strong>{semesterGPA}</strong></span>
             </div>
+            <button className="btn btn-outline">
+              View Previous Semesters
+            </button>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </div>
   );
 }
