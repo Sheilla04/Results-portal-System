@@ -1,5 +1,7 @@
+// src/components/Login.js
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from '../context/AuthContext';
 import { 
   Lock, 
   Eye, 
@@ -8,18 +10,22 @@ import {
   PersonBadge,
   Building,
   ArrowLeft,
-  Person
+  Person,
+  ExclamationCircle
 } from 'react-bootstrap-icons';
 import './Login.css';
 
 function Login() {
   const { role } = useParams();
   const navigate = useNavigate();
+  const { login, error: authError, clearError, isAuthenticated } = useAuth();
+  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
 
   const roleConfig = {
     student: {
@@ -28,15 +34,15 @@ function Login() {
       color: "#0066cc",
       gradient: "linear-gradient(135deg, #0066cc 0%, #3399ff 100%)",
       description: "Access your examination results and academic records",
-      placeholder: "Student ID or Email"
+      placeholder: "Student ID or Username"
     },
     lecturer: {
       title: "Lecturer Portal",
       icon: PersonBadge,
-      color: "#00875a",
-      gradient: "linear-gradient(135deg, #00875a 0%, #00b37d 100%)",
+      color: "#198754",
+      gradient: "linear-gradient(135deg, #198754 0%, #20c997 100%)",
       description: "Upload and manage student examination results",
-      placeholder: "Staff ID or Email"
+      placeholder: "Staff ID or Username"
     },
     admin: {
       title: "Examination Office",
@@ -44,26 +50,96 @@ function Login() {
       color: "#172b4d",
       gradient: "linear-gradient(135deg, #172b4d 0%, #2c3e50 100%)",
       description: "Manage official examination records and verification",
-      placeholder: "Admin ID or Email"
+      placeholder: "Admin Username"
     }
   };
 
   const config = roleConfig[role] || roleConfig.student;
   const Icon = config.icon;
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const dashboardRoutes = {
+        student: '/student',
+        lecturer: '/lecturer',
+        admin: '/admin',
+      };
+      navigate(dashboardRoutes[role] || '/', { replace: true });
+    }
+  }, [isAuthenticated, role, navigate]);
+
+  // Clear errors when component unmounts or role changes
+  useEffect(() => {
+    return () => {
+      clearError();
+      setError("");
+    };
+  }, [role, clearError]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setError("");
+    clearError();
+    
+    // Validation
+    if (!username.trim()) {
+      setError("Please enter your username");
+      return;
+    }
+    
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
+    
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const result = await login(username.trim(), password, role);
+      
+      if (result.success) {
+        // Save remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberedUsername', username);
+          localStorage.setItem('rememberedRole', role);
+        } else {
+          localStorage.removeItem('rememberedUsername');
+          localStorage.removeItem('rememberedRole');
+        }
+        
+        // Navigate to appropriate dashboard
+        const dashboardRoutes = {
+          student: '/student',
+          lecturer: '/lecturer',
+          admin: '/admin',
+        };
+        navigate(dashboardRoutes[role] || '/');
+      } else {
+        setError(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
-      // TEMPORARY (API integration comes later)
-      if (role === "student") navigate("/student");
-      if (role === "lecturer") navigate("/lecturer");
-      if (role === "admin") navigate("/admin");
-    }, 1500);
+    }
   };
+
+  // Load remembered username on component mount
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem('rememberedUsername');
+    const rememberedRole = localStorage.getItem('rememberedRole');
+    
+    if (rememberedUsername && rememberedRole === role) {
+      setUsername(rememberedUsername);
+      setRememberMe(true);
+    }
+  }, [role]);
+
+  const displayError = error || authError;
 
   return (
     <div className="login-container">
@@ -85,6 +161,7 @@ function Login() {
               </div>
               <h1 className="brand-title">{config.title}</h1>
               <p className="brand-description">{config.description}</p>
+              
             </div>
           </div>
         </div>
@@ -120,6 +197,14 @@ function Login() {
                   <p className="form-subtitle">Enter your credentials to access the system</p>
                 </div>
 
+                {/* Error Alert */}
+                {displayError && (
+                  <div className="alert alert-danger d-flex align-items-center" role="alert">
+                    <ExclamationCircle className="me-2" size={20} />
+                    <div>{displayError}</div>
+                  </div>
+                )}
+
                 <form onSubmit={handleLogin}>
                   {/* Username Field */}
                   <div className="form-group">
@@ -139,6 +224,7 @@ function Login() {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                         autoComplete="username"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -161,11 +247,13 @@ function Login() {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         autoComplete="current-password"
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         className="password-toggle"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
                       >
                         {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
                       </button>
@@ -181,6 +269,7 @@ function Login() {
                         id="rememberMe"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
+                        disabled={isLoading}
                       />
                       <label className="form-check-label" htmlFor="rememberMe">
                         Remember me
@@ -220,12 +309,11 @@ function Login() {
 
                   {/* Divider */}
                   <div className="divider">
-                    <span>or</span>
+                    <span>Need help?</span>
                   </div>
 
                   {/* Help Section */}
                   <div className="help-section">
-                    <p>Having trouble signing in?</p>
                     <div className="help-buttons">
                       <button
                         type="button"
