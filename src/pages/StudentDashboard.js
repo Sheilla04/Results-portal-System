@@ -12,46 +12,116 @@ function StudentDashboard() {
   const [gradeDistributionData, setGradeDistributionData] = useState([]);
   const [stats, setStats] = useState(null);
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const res = await studentAPI.getDashboard();
-        const { student, currentSemester, results, stats, gpaTrend } = res.data;
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [filters, setFilters] = useState({ semester: '', academicYear: '' });
 
-        setStudentInfo({
-          name: `${student.User.firstName} ${student.User.lastName}`,
-          id: student.studentId,
-          academicYear: student.academicYear,
-          semester: currentSemester.semester,
-          program: student.program,
-          department: student.department,
-          cgpa: Number(student.cgpa),
-          currentGPA: stats.currentGPA
-        });
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      const res = await studentAPI.getDashboard();
+      const { student, currentSemester, results, stats, gpaTrend } = res.data;
 
-        setCourses(results || []);
-        setStats(stats);
-        setGpaTrendData(gpaTrend || []);
+      setStudentInfo({
+        name: `${student.User.firstName} ${student.User.lastName}`,
+        id: student.studentId,
+        academicYear: student.academicYear,
+        semester: currentSemester.semester,
+        program: student.program,
+        department: student.department,
+        cgpa: Number(student.cgpa),
+        currentGPA: stats.currentGPA
+      });
 
-        // derive grade distribution
-        const dist = {};
-        (results || []).forEach(r => {
-          if (r.grade) dist[r.grade] = (dist[r.grade] || 0) + 1;
-        });
+      // Map results to include Course details at top-level for easy access
+      const mappedResults = (results || []).map(r => ({
+        id: r.id,
+        courseId: r.courseId,
+        score: r.score,
+        grade: r.grade,
+        credits: r.Course?.credits || 0,
+        courseCode: r.Course?.courseCode || '',
+        courseName: r.Course?.courseName || '',
+        status: r.remarks || ''
+      }));
 
-        setGradeDistributionData(
-          Object.entries(dist).map(([grade, count]) => ({ grade, count }))
-        );
+      setCourses(mappedResults);
+      setStats(stats);
+      setGpaTrendData(gpaTrend || []);
 
-      } catch (err) {
-        console.error('Failed to load dashboard', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      // derive grade distribution
+      const dist = {};
+      mappedResults.forEach(r => {
+        if (r.grade) dist[r.grade] = (dist[r.grade] || 0) + 1;
+      });
 
-    loadDashboard();
-  }, []);
+      setGradeDistributionData(
+        Object.entries(dist).map(([grade, count]) => ({ grade, count }))
+      );
+
+    } catch (err) {
+      console.error('Failed to load dashboard', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadDashboard();
+}, []);
+
+  const buildGradeDistribution = (results) => {
+    const dist = {};
+    results.forEach(r => {
+      if (r.grade) dist[r.grade] = (dist[r.grade] || 0) + 1;
+    });
+
+    setGradeDistributionData(
+      Object.entries(dist).map(([grade, count]) => ({ grade, count }))
+    );
+  };
+
+  // ================= HANDLERS =================
+
+  const handleDownloadTranscript = async () => {
+    await studentAPI.downloadTranscript();
+  };
+
+  const handleExportResults = async () => {
+    await studentAPI.exportResults(
+      filters.semester || studentInfo.semester,
+      filters.academicYear || studentInfo.academicYear
+    );
+  };
+
+const handleCourseClick = async (courseId) => {
+  if (!courseId) {
+    console.warn('Course ID missing, skipping request');
+    return;
+  }
+
+  try {
+    const res = await studentAPI.getCourseResult(courseId); // use courseId
+    if (res.success) {
+      setSelectedCourse(res.data);
+    }
+  } catch (err) {
+    console.error('Failed to fetch course result', err.response?.data || err.message);
+  }
+};
+
+
+  const handleFilterChange = async (e) => {
+    const { name, value } = e.target;
+    const newFilters = { ...filters, [name]: value };
+    setFilters(newFilters);
+
+    const res = await studentAPI.getResults(newFilters);
+    if (res.success) {
+      setCourses(res.data || []);
+      buildGradeDistribution(res.data || []);
+    }
+  };
+
+  // ================= HELPERS =================
 
   const getGradeColor = (grade) => {
     if (grade === 'A' || grade === 'A-') return '#198754';
@@ -100,62 +170,55 @@ function StudentDashboard() {
               </div>
             </div>
             <div className="header-actions">
-              <button className="btn btn-secondary" onClick={studentAPI.downloadTranscript}>
+              <button className="btn btn-secondary" onClick={handleDownloadTranscript}>
                 <img src="https://img.icons8.com/ios-filled/20/0066cc/download.png" alt="" />
                 Download Transcript
               </button>
-              <button className="btn btn-primary">
+              <button className="btn btn-primary" onClick={handleExportResults}>
                 <img src="https://img.icons8.com/ios-filled/20/ffffff/print.png" alt="" />
-                Print Results
+                Export Results
               </button>
             </div>
           </div>
         </div>
 
+        {/* Optional Filters */}
+        <div className="filters">
+          <input
+            name="academicYear"
+            placeholder="Academic Year"
+            onChange={handleFilterChange}
+          />
+          <select name="semester" onChange={handleFilterChange}>
+            <option value="">All Semesters</option>
+            <option value="Spring">Spring</option>
+            <option value="Fall">Fall</option>
+          </select>
+        </div>
+
         {/* Stats Grid */}
         <div className="stats-grid">
-
           <div className="stat-card stat-primary">
-            <div className="stat-content">
-              <div className="stat-info">
-                <div className="stat-label">Current GPA</div>
-                <div className="stat-value">{stats.currentGPA}</div>
-              </div>
-            </div>
+            <div className="stat-label">Current GPA</div>
+            <div className="stat-value">{stats.currentGPA}</div>
           </div>
 
           <div className="stat-card stat-success">
-            <div className="stat-content">
-              <div className="stat-info">
-                <div className="stat-label">Cumulative GPA</div>
-                <div className="stat-value">{stats.cgpa}</div>
-                <div className="stat-description">Overall performance</div>
-              </div>
-            </div>
+            <div className="stat-label">Cumulative GPA</div>
+            <div className="stat-value">{stats.cgpa}</div>
           </div>
 
           <div className="stat-card stat-info">
-            <div className="stat-content">
-              <div className="stat-info">
-                <div className="stat-label">Courses This Semester</div>
-                <div className="stat-value">{stats.totalCourses}</div>
-                <div className="stat-description">{totalCredits} credit hours</div>
-              </div>
-            </div>
+            <div className="stat-label">Courses This Semester</div>
+            <div className="stat-value">{stats.totalCourses}</div>
           </div>
 
           <div className="stat-card stat-warning">
-            <div className="stat-content">
-              <div className="stat-info">
-                <div className="stat-label">Results Status</div>
-                <div className="stat-value">
-                  {stats.completedCourses}/{stats.totalCourses}
-                </div>
-                <div className="stat-badge success">All Published</div>
-              </div>
+            <div className="stat-label">Results Status</div>
+            <div className="stat-value">
+              {stats.completedCourses}/{stats.totalCourses}
             </div>
           </div>
-
         </div>
 
         {/* Charts */}
@@ -191,10 +254,10 @@ function StudentDashboard() {
                   </tr>
                 ) : (
                   courses.map(course => (
-                    <tr key={course.id}>
-                      <td>{course.courseCode}</td>
-                      <td>{course.courseName}</td>
-                      <td>{course.credits}</td>
+                    <tr key={course.id} onClick={() => handleCourseClick(course.id)}>
+                      <td>{course.Course?.courseCode}</td>
+                      <td>{course.Course?.courseName}</td>
+                      <td>{course.Course?.credits}</td>
                       <td>{course.score}%</td>
                       <td>
                         <span
@@ -204,7 +267,7 @@ function StudentDashboard() {
                           {course.grade}
                         </span>
                       </td>
-                      <td>{course.status}</td>
+                      <td>{course.remarks}</td>
                     </tr>
                   ))
                 )}
@@ -219,6 +282,15 @@ function StudentDashboard() {
             </span>
           </div>
         </div>
+
+        {selectedCourse && (
+          <div className="modal">
+            <h3>{selectedCourse.courseName}</h3>
+            <p>Score: {selectedCourse.score}</p>
+            <p>Grade: {selectedCourse.grade}</p>
+            <button onClick={() => setSelectedCourse(null)}>Close</button>
+          </div>
+        )}
 
       </div>
     </div>

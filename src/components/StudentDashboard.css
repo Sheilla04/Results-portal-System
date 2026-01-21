@@ -182,10 +182,6 @@
   align-items: flex-start;
 }
 
-.stat-info {
-  flex: 1;
-}
-
 .stat-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -201,19 +197,6 @@
   color: #172b4d;
   margin-bottom: 0.5rem;
   line-height: 1;
-}
-
-.stat-trend {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-.stat-trend.positive {
-  color: #198754;
 }
 
 .stat-description {
@@ -238,32 +221,6 @@
   color: #198754;
 }
 
-.stat-icon-wrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-primary .stat-icon-wrapper {
-  background: rgba(0, 102, 204, 0.1);
-}
-
-.stat-success .stat-icon-wrapper {
-  background: rgba(25, 135, 84, 0.1);
-}
-
-.stat-info .stat-icon-wrapper {
-  background: rgba(13, 202, 240, 0.1);
-}
-
-.stat-warning .stat-icon-wrapper {
-  background: rgba(255, 193, 7, 0.1);
-}
-
 /* Charts Section */
 .charts-section {
   display: grid;
@@ -279,90 +236,12 @@
   overflow: hidden;
 }
 
-.chart-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chart-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.chart-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.chart-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #172b4d;
-  margin: 0 0 0.25rem 0;
-}
-
-.chart-subtitle {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin: 0;
-}
-
-.chart-body {
-  padding: 1.5rem;
-  background: #fafbfc;
-}
-
 /* Table Container */
 .table-container {
   background: white;
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-.table-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.table-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.table-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.table-title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #172b4d;
-  margin: 0 0 0.25rem 0;
-}
-
-.table-subtitle {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin: 0;
-}
-
-.table-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .table-wrapper {
@@ -385,18 +264,15 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #6c757d;
+  color: #172b4d; /* dark for visibility */
   border-bottom: 2px solid #e9ecef;
-}
-
-.results-table th.text-center {
-  text-align: center;
 }
 
 .results-table td {
   padding: 1.25rem;
   border-bottom: 1px solid #f1f5f9;
-  color: #495057;
+  color: #000; /* force black text */
+  font-weight: 500;
 }
 
 .results-table tbody tr {
@@ -407,47 +283,19 @@
   background: rgba(0, 102, 204, 0.02);
 }
 
-.course-code {
+/* Specific columns */
+.results-table td.course-code {
   font-weight: 700;
   color: #0066cc;
   font-size: 0.95rem;
 }
 
-.lecturer-name {
-  font-size: 0.875rem;
-  color: #6c757d;
+.results-table td.course-name,
+.results-table td.credits {
+  color: #000;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-secondary {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.score {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.score-high {
-  color: #198754;
-}
-
-.score-medium {
-  color: #0066cc;
-}
-
-.score-low {
-  color: #ffc107;
-}
-
+/* Grade & Status Badges */
 .grade-badge {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -472,29 +320,6 @@
 .status-approved {
   background: #198754;
   color: white;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.action-btn {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-btn:hover {
-  background: #f8f9fa;
-  transform: scale(1.1);
 }
 
 .table-footer {
@@ -539,11 +364,6 @@
 
   .stats-grid {
     grid-template-columns: 1fr;
-  }
-
-  .table-header {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .table-footer {
